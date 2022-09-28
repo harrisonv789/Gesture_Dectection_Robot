@@ -3,6 +3,8 @@ import pandas as pd
 import keras
 import numpy as np
 from keras.models import Sequential
+from image import Image
+
 
 class Model:
     '''
@@ -120,34 +122,28 @@ class Model:
         self.model.save(output)
         print("Model has been saved.")
 
-    def predict (self, image_name: str) -> str:
+    def predict (self, image: Image) -> tuple:
         '''
         This method takes in an image and attempts to predict what letter
         the image is based on the current CNN model that has been loaded.
         The letter is returned as an output string.
         '''
-        # Include the necessary libraries
-        import matplotlib.image as mpimg
 
-        # Read the image
-        img = mpimg.imread(image_name)
+        # Get the image data
+        array: np.ndarray = image.get_data()
 
-        # Converts the image to a greyscale, and gets it in the form that we need it in
-        grey = self.rgb_to_grey(img)
-        grey = grey.reshape((grey.shape[0], 28, 1))
-        array = np.array([grey])
-
+        # Get the prediction
         prediction = self.model.predict(array)
-        return self.labels[np.argmax(prediction)]
 
-    def rgb_to_grey (self, rgb):
-        return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
-
-
+        # Return the data
+        guess = np.max(prediction) * 100.0
+        label = self.labels[np.argmax(prediction)]
+        return (label, guess)
 
 if __name__ == "__main__":
     model = Model()
     #model.train("../../models/sign_model")
     model.load("../../models/sign_model")
-    prediction = model.predict("../../examples/A.png")
+    image = Image("../../examples/A.png")
+    prediction = model.predict(image)
     print(prediction)
