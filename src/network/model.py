@@ -4,6 +4,7 @@ import keras
 import numpy as np
 from keras.models import Sequential
 from image import Image
+from prediction import PredictionData
 
 
 class Model:
@@ -122,7 +123,7 @@ class Model:
         self.model.save(output)
         print("Model has been saved.")
 
-    def predict (self, image: Image) -> tuple:
+    def predict (self, image: Image) -> PredictionData:
         '''
         This method takes in an image and attempts to predict what letter
         the image is based on the current CNN model that has been loaded.
@@ -138,7 +139,7 @@ class Model:
         # Return the data
         guess = np.max(prediction) * 100.0
         label = self.labels[np.argmax(prediction)]
-        return (label, guess)
+        return PredictionData(label, guess)
 
 if __name__ == "__main__":
     model = Model()
