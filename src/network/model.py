@@ -70,8 +70,25 @@ class Model:
         test_data_image = raw_testing_data.values / 255
 
         # Reshape the image data
-        train_data_image = train_data_image.reshape(-1,28,28,1)
-        test_data_image = test_data_image.reshape(-1,28,28,1)
+        train_data_image = train_data_image.reshape(-1, 28, 28, 1)
+        test_data_image = test_data_image.reshape(-1, 28, 28, 1)
+
+        # With data augmentation to prevent overfitting
+        datagen = ImageDataGenerator(
+            featurewise_center=False,  # set input mean to 0 over the dataset
+            samplewise_center=False,  # set each sample mean to 0
+            featurewise_std_normalization=False,  # divide inputs by std of the dataset
+            samplewise_std_normalization=False,  # divide each input by its std
+            zca_whitening=False,  # apply ZCA whitening
+            rotation_range=30,  # randomly rotate images in the range (degrees, 0 to 180)
+            zoom_range = 0.5, # Randomly zoom image 
+            width_shift_range=0.3,  # randomly shift images horizontally (fraction of total width)
+            height_shift_range=0.3,  # randomly shift images vertically (fraction of total height)
+            horizontal_flip=False,  # randomly flip images
+            vertical_flip=False)  # randomly flip images
+
+        # Fit the data
+        datagen.fit(train_data_image)
 
         # Create the model
         self.model = Sequential()
@@ -93,23 +110,6 @@ class Model:
         self.model.add(Dense(units = 24 , activation = 'softmax'))
         self.model.compile(optimizer = 'adam' , loss = 'categorical_crossentropy' , metrics = ['accuracy'])
         self.model.summary()
-
-        # With data augmentation to prevent overfitting
-        datagen = ImageDataGenerator(
-            featurewise_center=False,  # set input mean to 0 over the dataset
-            samplewise_center=False,  # set each sample mean to 0
-            featurewise_std_normalization=False,  # divide inputs by std of the dataset
-            samplewise_std_normalization=False,  # divide each input by its std
-            zca_whitening=False,  # apply ZCA whitening
-            rotation_range=10,  # randomly rotate images in the range (degrees, 0 to 180)
-            zoom_range = 0.1, # Randomly zoom image 
-            width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-            height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
-            horizontal_flip=False,  # randomly flip images
-            vertical_flip=False)  # randomly flip images
-
-        # Fit the data
-        datagen.fit(train_data_image)
 
         # Perform the learning
         learning_rate_reduction = ReduceLROnPlateau(monitor='val_accuracy', patience = 2, verbose=1, factor=0.5, min_lr=0.00001)
@@ -143,7 +143,7 @@ class Model:
 
 if __name__ == "__main__":
     model = Model()
-    #model.train("../../models/sign_model")
+    model.train("../../models/sign_model", 20)
     model.load("../../models/sign_model")
     image = Image("../../examples/A.png")
     prediction = model.predict(image)

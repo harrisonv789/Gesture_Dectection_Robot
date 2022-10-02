@@ -5,7 +5,6 @@ from image import Image
 from model import Model
 from prediction import PredictionData
 
-
 def main (ip: str = "192.168.1.112"):
     '''
     This is the main function that is executed to check for 
@@ -100,10 +99,6 @@ def determine_letter (recents: "list[PredictionData]") -> str:
     
     # Otherwise, return the letter
     return check
-
-
-
-
 
 
 # When the main loop is called
