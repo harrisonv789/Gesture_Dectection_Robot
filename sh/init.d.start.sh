@@ -11,5 +11,5 @@
 ### END INIT INFO
 
 # Start the initial script after some time
-sleep 10s
+sleep 3s
 . /home/pi/Desktop/Sign_Language_Neural/sh/pi.sh &

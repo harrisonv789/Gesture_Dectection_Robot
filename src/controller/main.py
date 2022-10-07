@@ -9,6 +9,12 @@ class Controller:
     # The current letter
     letter: str = None
     
+    # The previous receive time
+    prev_time: datetime = None
+    
+    # The timeout for the server
+    timeout: int = 1
+    
     def __init__ (self, ip: str = "192.168.1.112"):
         '''
         Initialises the main controller loop that is able
@@ -28,16 +34,15 @@ class Controller:
                 break
             except: time.sleep(0.1)
 
-        # Create the LED class
+        # Create the LED class and set the LED to red while waiting
         self.led = LED()
-        # Set the LED to red while waiting
         self.led.set_color(LED_RED)
         
         # Start the listening thread
         self.thread = threading.Thread(target=self.listen)
         self.thread.start()
         
-        print("Server has been initialised and waiting for data...")
+        log_msg("Server has been initialised and waiting for data...")
         
     def listen (self):
         '''
@@ -47,21 +52,37 @@ class Controller:
         '''
         while True:
         
+            # Change the color to red while wait
+            self.led.set_color(LED_RED)
+        
             # Get the current server data if it exists
             (client, address) = self.server.accept()
-            print("Connection has been made with %s:%s!" % (address[0], address[1]))
+            log_msg("Connection has been made with %s:%s!" % (address[0], address[1]))
+            
+            # Set the timeout
+            client.settimeout(self.timeout)
+            self.prev_time = None
             
             # Reset the LED to off
-            self.led.set_color(LED_NONE)
+            self.led.set_color(LED_YELLOW)
             
-            while True:
+            # Loop until the timeout is exhausted
+            while self.prev_time == None or (datetime.now() - self.prev_time).seconds < self.timeout:
+            
                 # Once data has been received, we can decode it
                 try:
-                    data: str = client.recv(1024).decode()
-                    if data != "":
-                        self.update_letter(data)
+                
+                    # Attempts to receive some data and updates the letter
+                    data = client.recv(1024)
+                    if data != b'' and data != None:
+                        self.update_letter(data.decode())
+                        self.prev_time = datetime.now()
+                    
+                # If an exception is thrown, print and move on
                 except Exception as ex:
-                    print(ex)
+                    log_msg("Failed to read client data because '%s'." % ex)
+                
+                # Give some time before looking for data again
                 time.sleep(0.1)
                 
     def update_letter (self, letter: str):
@@ -71,7 +92,7 @@ class Controller:
         '''
         
         # Checks if the letter has been updated     
-        if letter == "None" or len(letter) > 1: letter = None
+        if letter == "None" or len(letter) != 1: letter = None
         if self.letter == letter: return
         
         # At this point, the letter has changed
@@ -85,29 +106,38 @@ class Controller:
     
     def shutdown (self):
         '''
-        Shutsdown the thread and ensures that everything
+        Shuts down the thread and ensures that everything
         safely closes correctly.
         '''
-        print("Shutting down.")
+        log_msg("Shutting down.")
         self.led.set_color(LED_NONE)
         self.thread.join()
+   
         
-
-# When this file gets executed
-if __name__ == "__main__":
-
+def log_msg (msg: str):
+    '''
+    This method logs a particular message from a current
+    time to the log file that can be found on the user's
+    Desktop directory.
+    '''
     # The file path to write updates to.
     file_path: str = "/home/pi/Desktop/controller_status.txt"
 
     with open(file_path, "a+") as file:
-        file.write("%s - Executing control script.\n" % datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
-        
+        file.write("[%s] %s\n" % (datetime.now().strftime("%H:%M:%S %d/%m/%Y"), msg))
+    
+    # Also print the lines
+    print(msg)
+
+
+# When this file gets executed
+if __name__ == "__main__":
+
     # Attempt to run the controller
     try:
         controller = Controller()
     except KeyboardInterrupt:
         controller.shutdown()
     except Exception as ex:
-        with open(file_path, "a") as file:
-            file.write("Program failed because '%s'.\n" % str(ex))
+        log_msg("Program failed because '%s'.\n" % str(ex))
         
