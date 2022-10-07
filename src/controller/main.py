@@ -19,8 +19,14 @@ class Controller:
         # Set up the websockets
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server.bind((ip, 9000))
-        self.server.listen()
+        
+        # Loop until address becomes available
+        while True: 
+            try:
+                self.server.bind((ip, 9000))
+                self.server.listen()
+                break
+            except: time.sleep(0.1)
 
         # Create the LED class
         self.led = LED()
