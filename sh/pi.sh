@@ -10,7 +10,7 @@ cd "/home/pi/Desktop/Sign_Language_Neural/"
 
 # Run the main file
 cd "src/controller/"
-./main.py
+python3 main.py
 
 # Retrieve the process ID of the camera and kill service
 pid=$(pidof gst-launch-1.0)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import socket, threading, time
+from datetime import datetime
 from led import LED, LED_NONE, LED_GREEN, LED_RED, LED_YELLOW
 
 class Controller:
@@ -86,9 +87,21 @@ class Controller:
         self.thread.join()
         
 
+# When this file gets executed
 if __name__ == "__main__":
+
+    # The file path to write updates to.
+    file_path: str = "/home/pi/Desktop/controller_status.txt"
+
+    with open(file_path, "a+") as file:
+        file.write("%s - Executing control script.\n" % datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
+        
+    # Attempt to run the controller
     try:
         controller = Controller()
     except KeyboardInterrupt:
         controller.shutdown()
+    except Exception as ex:
+        with open(file_path, "a") as file:
+            file.write("Program failed because '%s'.\n" % str(ex))
         
