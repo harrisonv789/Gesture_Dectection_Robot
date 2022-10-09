@@ -3,11 +3,17 @@
 import socket, threading, time
 from datetime import datetime
 from led import LED, LED_NONE, LED_GREEN, LED_RED, LED_YELLOW
+from drive import Driver
 
 class Controller:
+    '''
+    This class handles the communications from the Raspberry PI
+    to the neural network device and is able to send procedures
+    that are interpreted to a GPIO output device.
+    '''
     
-    # The current letter
-    letter: str = None
+    # The current result
+    result: str = None
     
     # The previous receive time
     prev_time: datetime = None
@@ -37,6 +43,9 @@ class Controller:
         # Create the LED class and set the LED to red while waiting
         self.led = LED()
         self.led.set_color(LED_RED)
+        
+        # Create the driver class for controlling the wheels
+        self.driver = Driver()
         
         # Start the listening thread
         self.thread = threading.Thread(target=self.listen)
@@ -72,10 +81,10 @@ class Controller:
                 # Once data has been received, we can decode it
                 try:
                 
-                    # Attempts to receive some data and updates the letter
+                    # Attempts to receive some data and updates the result
                     data = client.recv(1024)
                     if data != b'' and data != None:
-                        self.update_letter(data.decode())
+                        self.update_result(data.decode())
                         self.prev_time = datetime.now()
                     
                 # If an exception is thrown, print and move on
@@ -85,23 +94,53 @@ class Controller:
                 # Give some time before looking for data again
                 time.sleep(0.1)
                 
-    def update_letter (self, letter: str):
+    def update_result (self, result: str):
         '''
-        This method handles the letter being updated and
+        This method handles the result being updated and
         can send out the appropriate action .
         '''
         
         # Checks if the letter has been updated     
-        if letter == "None" or len(letter) != 1: letter = None
-        if self.letter == letter: return
+        if result == "None" or len(result) == 0: result = None
+        if self.result == result: return
         
         # At this point, the letter has changed
-        self.letter = letter
-        print(self.letter)
+        self.result = result
         
         # Update the LED based on the color
-        if letter == None: self.led.set_color(LED_YELLOW)
+        if result == None: self.led.set_color(LED_YELLOW)
         else: self.led.set_color(LED_GREEN)
+        
+        # Dispatch the action
+        self.dispatch_action(result)
+    
+    
+    def dispatch_action (self, result: str):
+        '''
+        This gets the appropriate action from the action
+        list based on the result and dispatches the action
+        to be executed.
+        '''
+        
+        # Check for the missing command
+        if result == None:
+            self.driver.stop()
+            return
+        
+        # Get the new result
+        result = result.lower()
+        
+        # Driving forward
+        if result == "thumbs up":
+            self.driver.drive(1.0, 0.0)
+        
+        # Driving reverse
+        elif result == "thumbs down":
+            self.driver.drive(-1.0, 0.0)
+            
+        # Any other action should stop
+        else:
+            self.driver.stop()
     
     
     def shutdown (self):
