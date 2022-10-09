@@ -3,9 +3,10 @@
 import time, os, socket
 from image import Image
 from model import Model
+from gesture import Gesture
 from prediction import PredictionData
 
-def main (ip: str = "192.168.1.112"):
+def main (ip: str = "192.168.1.112", use_cv: bool = False):
     '''
     This is the main function that is executed to check for 
     image and then process the results
@@ -24,9 +25,14 @@ def main (ip: str = "192.168.1.112"):
     # Print the client connection status
     print("Client has been connected.")
 
-    # Load the model
-    model = Model()
-    model.load("../../models/sign_model")
+    # Load the CV model
+    if use_cv:
+        model = Gesture()
+    
+    # Loads the standard neural network model
+    else:
+        model = Model()
+        model.load("../../models/sign_model")
 
     # Most recent letters
     recents: list = [None] * 10
@@ -52,17 +58,17 @@ def main (ip: str = "192.168.1.112"):
         recents.insert(0, prediction)
 
         # Determine the letter
-        letter: str = determine_letter(recents)
+        result: str = determine_result(recents)
 
         # Check if the letter is valid
-        if letter != None:
-            print("Current Prediction: %s" % letter)
+        if result != None:
+            print("Current Prediction: %s" % result)
         else:
             print("No Prediction Made.")
         
-        # Send through the letter (even if it is None)
+        # Send through the result (even if it is None)
         try:
-            client.send(str(letter).encode())
+            client.send(str(result).encode())
         except:
             pass
 
@@ -70,17 +76,17 @@ def main (ip: str = "192.168.1.112"):
         time.sleep(0.1)
 
 
-def determine_letter (recents: "list[PredictionData]") -> str:
+def determine_result (recents: "list[PredictionData]") -> str:
     '''
     Attempts to determine the letter most likely to be
     based on a list of predictions
     '''
 
     # Get the number of letters of the same type
-    check: str = recents[0].letter
+    check: str = recents[0].result
     count: int = 1
     for prediction in recents[1:]:
-        if prediction != None and prediction.letter == check:
+        if prediction != None and prediction.result == check:
             count += 1
     
     # If the number of letters is not consistent, then return None
@@ -88,19 +94,19 @@ def determine_letter (recents: "list[PredictionData]") -> str:
         return None
 
     # Next, sum the prediction accuracies and check to see if the sum of the
-    #   correct letter results in 95% accuracy
+    #   correct result results in 95% accuracy
     accuracies: float = 0
     for prediction in recents:
-        if prediction != None and prediction.letter == check:
+        if prediction != None and prediction.result == check:
             accuracies += prediction.value
     
     if (accuracies / 100.0) / float(count) < 0.85:
         return None
     
-    # Otherwise, return the letter
+    # Otherwise, return the result
     return check
 
 
 # When the main loop is called
 if __name__ == "__main__":
-    main()
+    main(use_cv=True)

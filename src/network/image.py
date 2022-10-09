@@ -31,6 +31,33 @@ class Image:
         current image if one already exists.
         '''
         self.image.save(file)
+
+    def get_raw (self):
+        '''
+        Returns the raw data from the image that can be read by
+        OpenCV.
+        '''
+        return np.array(self.image.getdata())
+    
+    def get_opencv_data (self) -> np.ndarray:
+        '''
+        Returns the data in the format of an OPEN CV array.
+        This will reformat the data into the correct process.
+        '''
+
+        # Get the raw data
+        raw = self.get_raw()
+        formatted: list = []
+
+        # Loops through each row an
+        for j in range (self.image.size[1]):
+            row: list = []
+            for i in range(self.image.size[0]):
+                data = raw[j * self.image.size[0] + i]
+                row.append([data[2], data[1], data[0]])
+            formatted.append(row)
+        return np.array(formatted).astype(np.uint8)
+
     
     def get_data (self, width: int = 28, height: int = 28) -> np.ndarray:
         '''
