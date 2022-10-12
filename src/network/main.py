@@ -16,9 +16,11 @@ def main (ip: str = "192.168.1.112", use_cv: bool = False):
     if use_cv:
         print("Using an OpenCV neural network for the sign language.")
         data_length: int = 5
+        accuracy: float = 0.95
     else:
         print("Using a trained neural network for letters.")
         data_length: int = 10
+        accuracy: float = 0.85
 
     # Set up the sockets (until one exists)
     while True:
@@ -69,7 +71,7 @@ def main (ip: str = "192.168.1.112", use_cv: bool = False):
         recents.insert(0, prediction)
 
         # Determine the result
-        result: str = determine_result(recents)
+        result: str = determine_result(recents, accuracy)
 
         # Check if the result is valid
         if result != None:
@@ -87,7 +89,7 @@ def main (ip: str = "192.168.1.112", use_cv: bool = False):
         time.sleep(0.02)
 
 
-def determine_result (recents: "list[PredictionData]") -> str:
+def determine_result (recents: "list[PredictionData]", accuracy: float) -> str:
     '''
     Attempts to determine the result most likely to be
     based on a list of predictions
@@ -101,7 +103,7 @@ def determine_result (recents: "list[PredictionData]") -> str:
             count += 1
     
     # If the number of results is not consistent, then return None
-    if float(count) / float(len(recents)) < 0.95:
+    if float(count) / float(len(recents)) < accuracy:
         return None
 
     # Next, sum the prediction accuracies and check to see if the sum of the
@@ -111,7 +113,7 @@ def determine_result (recents: "list[PredictionData]") -> str:
         if prediction != None and prediction.result == check:
             accuracies += prediction.value
     
-    if (accuracies / 100.0) / float(count) < 0.85:
+    if (accuracies / 100.0) / float(count) < accuracy:
         return None
     
     # Otherwise, return the result
