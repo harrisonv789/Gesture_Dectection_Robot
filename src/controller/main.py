@@ -23,7 +23,7 @@ class Controller:
     timeout: int = 1
     
     # The minimum distance before stopping
-    MINIMUM_DISTANCE: float = 10.0
+    MINIMUM_DISTANCE: float = 20.0
     
     def __init__ (self, ip: str = "192.168.1.112"):
         '''
@@ -110,29 +110,35 @@ class Controller:
         
         # Checks if the distance is less than the minimum
         distance: float = self.distance.get_average()
+        move_forward: bool = True
         if distance != None and distance < self.MINIMUM_DISTANCE:
-            result = None
+            # Make the LED flash if in the minimum
+            move_forward = False
         
         # Checks if the letter has been updated     
         if result != None and (result == "None" or len(result) == 0): result = None
-        if self.result == result: return
+        if self.result == result:
+            if result == None or not move_forward:
+                self.led.set_color(LED_YELLOW, not move_forward)
+            return
         
         # At this point, the letter has changed
         self.result = result
         
         # Update the LED based on the color
-        if result == None: self.led.set_color(LED_YELLOW)
-        else: self.led.set_color(LED_GREEN)
+        if result == None: self.led.set_color(LED_YELLOW, not move_forward)
+        else: self.led.set_color(LED_GREEN, not move_forward)
         
         # Dispatch the action
-        self.dispatch_action(result)
+        self.dispatch_action(result, move_forward)
     
     
-    def dispatch_action (self, result: str):
+    def dispatch_action (self, result: str, move_forward: bool):
         '''
         This gets the appropriate action from the action
         list based on the result and dispatches the action
-        to be executed.
+        to be executed. The move forward flag ensures that only
+        forward commands can be executed when it is able to.
         '''
         
         # Check for the missing command
@@ -144,7 +150,7 @@ class Controller:
         result = result.lower()
         
         # Driving forward
-        if result == "thumbs up":
+        if result in ("thumbs up", "rock", "call me", "fist") and move_forward:
             self.driver.drive(1.0, 0.0)
         
         # Driving reverse
