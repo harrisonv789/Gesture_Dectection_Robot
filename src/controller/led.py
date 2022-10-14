@@ -18,7 +18,7 @@ class LED:
         Initialises the pins for the lights
         to output power.
         '''
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(self.get_pin(LED_RED), GPIO.OUT)
         GPIO.setup(self.get_pin(LED_YELLOW), GPIO.OUT)
@@ -29,9 +29,9 @@ class LED:
         Returns the PIN output pin for a respective
         color of some type.
         '''
-        if light == LED_RED: return 11 # GPIO17
-        if light == LED_YELLOW: return 13 # GPIO27
-        if light == LED_GREEN: return 15 # GPIO27
+        if light == LED_RED: return 17 # GPIO17
+        if light == LED_YELLOW: return 27 # GPIO27
+        if light == LED_GREEN: return 22 # GPIO22
         
     def set_led (self, light: int, state: bool):
         '''

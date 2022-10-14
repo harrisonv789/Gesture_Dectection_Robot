@@ -4,6 +4,7 @@ import socket, threading, time
 from datetime import datetime
 from led import LED, LED_NONE, LED_GREEN, LED_RED, LED_YELLOW
 from drive import Driver
+from distance import DistanceSensor
 
 class Controller:
     '''
@@ -20,6 +21,9 @@ class Controller:
     
     # The timeout for the server
     timeout: int = 1
+    
+    # The minimum distance before stopping
+    MINIMUM_DISTANCE: float = 10.0
     
     def __init__ (self, ip: str = "192.168.1.112"):
         '''
@@ -43,6 +47,9 @@ class Controller:
         # Create the LED class and set the LED to red while waiting
         self.led = LED()
         self.led.set_color(LED_RED)
+        
+        # Create the distance sensor class
+        self.distance = DistanceSensor()
         
         # Create the driver class for controlling the wheels
         self.driver = Driver()
@@ -90,6 +97,7 @@ class Controller:
                 # If an exception is thrown, print and move on
                 except Exception as ex:
                     log_msg("Failed to read client data because '%s'." % ex)
+                    self.update_result(None)
                 
                 # Give some time before looking for data again
                 time.sleep(0.1)
@@ -100,8 +108,13 @@ class Controller:
         can send out the appropriate action .
         '''
         
+        # Checks if the distance is less than the minimum
+        distance: float = self.distance.get_average()
+        if distance != None and distance < self.MINIMUM_DISTANCE:
+            result = None
+        
         # Checks if the letter has been updated     
-        if result == "None" or len(result) == 0: result = None
+        if result != None and (result == "None" or len(result) == 0): result = None
         if self.result == result: return
         
         # At this point, the letter has changed
@@ -151,6 +164,7 @@ class Controller:
         log_msg("Shutting down.")
         self.led.set_color(LED_NONE)
         self.thread.join()
+        self.distance.close()
    
         
 def log_msg (msg: str):
