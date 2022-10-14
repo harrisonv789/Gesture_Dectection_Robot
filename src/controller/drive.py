@@ -15,7 +15,7 @@ class Driver:
     RIGHT_MOTOR: int = 1
     
     # Define the speed multiplier
-    MULTIPLIER: float = 0.3
+    MULTIPLIER: float = 0.6
 
     def __init__ (self) -> None:
         '''
@@ -111,4 +111,7 @@ class Driver:
         
 if __name__ == "__main__":
     output = Driver()
+    output.stop()
+    output.drive(0.5)
+    time.sleep(1.0)
     output.stop()
