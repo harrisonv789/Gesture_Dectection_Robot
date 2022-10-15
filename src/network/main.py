@@ -6,7 +6,7 @@ from model import Model
 from gesture import Gesture
 from prediction import PredictionData
 
-def main (ip: str = "192.168.1.112", use_cv: bool = False):
+def main (ip: str = "172.20.10.2", use_cv: bool = False):
     '''
     This is the main function that is executed to check for 
     image and then process the results
@@ -16,7 +16,7 @@ def main (ip: str = "192.168.1.112", use_cv: bool = False):
     if use_cv:
         print("Using an OpenCV neural network for the sign language.")
         data_length: int = 5
-        accuracy: float = 0.95
+        accuracy: float = 0.8
     else:
         print("Using a trained neural network for letters.")
         data_length: int = 10
