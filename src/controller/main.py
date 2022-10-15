@@ -158,7 +158,7 @@ class Controller:
             self.driver.drive(-1.0, 0.0)
         
         # Attempt a spin
-        elif result == "okay" and move_forward:
+        elif result in ("okay", "peace") and move_forward:
             self.driver.drive(1.0, 1.0)
             
         # Any other action should stop
