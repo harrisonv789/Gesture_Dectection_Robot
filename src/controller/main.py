@@ -25,7 +25,7 @@ class Controller:
     # The minimum distance before stopping
     MINIMUM_DISTANCE: float = 20.0
     
-    def __init__ (self, ip: str = "192.168.1.112"):
+    def __init__ (self, ip: str = "172.20.10.2"):
         '''
         Initialises the main controller loop that is able
         to listen for a websocket from the neural network

@@ -70,18 +70,18 @@ if __name__ == "__main__":
     led = LED()
     led.set_color(LED_NONE)
     
-    for _ in range(20):
+    for _ in range(10):
         led.set_color(LED_RED, True)
         time.sleep(0.1)
     
-    led.set_color(LED_RED)
-    time.sleep(1.0)
+    #led.set_color(LED_RED)
+    #time.sleep(1.0)
       
-    led.set_color(LED_YELLOW)
-    time.sleep(1.0)
+    #led.set_color(LED_YELLOW)
+    #time.sleep(1.0)
     
-    led.set_color(LED_GREEN)
-    time.sleep(1.0)
+    #led.set_color(LED_GREEN)
+    #time.sleep(1.0)
     
     led.set_color(LED_NONE)
     
