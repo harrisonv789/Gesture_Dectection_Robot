@@ -61,9 +61,13 @@ class Driver:
         # Determine the new speed
         speed *= self.MULTIPLIER
         
+        # Calculate the left speed
+        left_speed: float = 1.0 if steer <= 0.0 else -2.0 * steer + 1
+        right_speed: float = 1.0 if steer >= 0.0 else 2.0 * steer + 1
+        
         # Send both motors
-        self.motor_send(self.LEFT_MOTOR, speed)
-        self.motor_send(self.RIGHT_MOTOR, speed)
+        self.motor_send(self.LEFT_MOTOR, speed * left_speed)
+        self.motor_send(self.RIGHT_MOTOR, speed * right_speed)
         
         
     def motor_send (self, motor: int, power: float = 1.0) -> None:
@@ -112,6 +116,6 @@ class Driver:
 if __name__ == "__main__":
     output = Driver()
     output.stop()
-    output.drive(0.5)
-    time.sleep(1.0)
+    output.drive(1.0, -1.0)
+    time.sleep(2.0)
     output.stop()

@@ -156,6 +156,10 @@ class Controller:
         # Driving reverse
         elif result == "thumbs down":
             self.driver.drive(-1.0, 0.0)
+        
+        # Attempt a spin
+        elif result == "okay" and move_forward:
+            self.driver.drive(1.0, 1.0)
             
         # Any other action should stop
         else:
