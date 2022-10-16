@@ -111,6 +111,7 @@ class Controller:
         # Checks if the distance is less than the minimum
         distance: float = self.distance.get_average()
         move_forward: bool = True
+        print(str(distance) + " cm.")
         if distance != None and distance < self.MINIMUM_DISTANCE:
             # Make the LED flash if in the minimum
             move_forward = False
@@ -120,6 +121,8 @@ class Controller:
         if self.result == result:
             if result == None or not move_forward:
                 self.led.set_color(LED_YELLOW, not move_forward)
+            if not move_forward and result != None and result != "thumbs down":
+                self.dispatch_action(None, move_forward)
             return
         
         # At this point, the letter has changed
