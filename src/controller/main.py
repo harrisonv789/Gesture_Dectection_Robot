@@ -111,22 +111,20 @@ class Controller:
         # Checks if the distance is less than the minimum
         distance: float = self.distance.get_average()
         move_forward: bool = True
-        print(str(distance) + " cm.")
         if distance != None and distance < self.MINIMUM_DISTANCE:
             # Make the LED flash if in the minimum
             move_forward = False
         
         # Checks if the letter has been updated     
         if result != None and (result == "None" or len(result) == 0): result = None
-        if self.result == result:
-            if result == None or not move_forward:
-                self.led.set_color(LED_YELLOW, not move_forward)
-            if not move_forward and result != None and result != "thumbs down":
-                self.dispatch_action(None, move_forward)
+        if self.result == result and move_forward:
             return
         
         # At this point, the letter has changed
-        self.result = result
+        if move_forward:
+            self.result = result
+        else:
+            self.result = None
         
         # Update the LED based on the color
         if result == None: self.led.set_color(LED_YELLOW, not move_forward)
@@ -143,6 +141,8 @@ class Controller:
         to be executed. The move forward flag ensures that only
         forward commands can be executed when it is able to.
         '''
+        
+        print("Dispatching action '%s'." % str(result))
         
         # Check for the missing command
         if result == None:
