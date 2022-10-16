@@ -64,7 +64,7 @@ def loop ():
         client.send(str(current_action).encode())
 
         # Wait some time
-        time.sleep(0.1)
+        time.sleep(0.15)
 
 
 # When the main loop is called
