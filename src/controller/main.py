@@ -20,7 +20,7 @@ class Controller:
     prev_time: datetime = None
     
     # The timeout for the server
-    timeout: int = 1
+    timeout: float = 3.0
     
     # The minimum distance before stopping
     MINIMUM_DISTANCE: float = 20.0
