@@ -15,7 +15,7 @@ thread: threading.Thread = None
 stop: bool = False
 
 
-def main (ip: str = "172.20.10.2"):
+def main (ip: str = "172.20.10.4"):
     '''
     This is the main function that is executed for sending through
     fake commands to the robot for testing purposes.
